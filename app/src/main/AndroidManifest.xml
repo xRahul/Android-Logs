@@ -10,6 +10,14 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.RECEIVE_MMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -18,6 +26,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,8 +41,12 @@
         <receiver
             android:name=".AllReceivers"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
+
+                <!-- https://sdgsystems.com/blog/android-device-owner -->
+                <!-- https://developer.android.com/reference/android/app/admin/DeviceAdminReceiver.html -->
                 <action android:name="android.app.action.ACTION_PASSWORD_CHANGED" />
                 <action android:name="android.app.action.ACTION_PASSWORD_EXPIRING" />
                 <action android:name="android.app.action.ACTION_PASSWORD_FAILED" />
@@ -37,23 +54,35 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
                 <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-                <action android:name="android.app.action.DEVICE_OWNER_CHANGED" />
-                <action android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
                 <action android:name="android.app.action.LOCK_TASK_ENTERING" />
                 <action android:name="android.app.action.LOCK_TASK_EXITING" />
-                <action android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
+                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
+
+                <!-- https://developer.android.com/reference/android/app/admin/DevicePolicyManager.html -->
+                <action android:name="android.app.action.DEVICE_OWNER_CHANGED" />
+                <action android:name="android.app.action.SYSTEM_UPDATE_POLICY_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/app/NotificationManager.html -->
+                <action android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
                 <action android:name="android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED" />
                 <action android:name="android.app.action.NOTIFICATION_POLICY_CHANGED" />
-                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
-                <action android:name="android.app.action.SYSTEM_UPDATE_POLICY_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/app/AlarmManager.html -->
+                <action android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/bluetooth/BluetoothA2dp.html -->
                 <action android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
                 <action android:name="android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/bluetooth/BluetoothAdapter.html -->
                 <action android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
                 <action android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
                 <action android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
                 <action android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
                 <action android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/bluetooth/BluetoothDevice.html -->
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
@@ -63,44 +92,54 @@
                 <action android:name="android.bluetooth.device.action.NAME_CHANGED" />
                 <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
                 <action android:name="android.bluetooth.device.action.UUID" />
+
+                <!-- https://gist.github.com/timnew/7908603 -->
                 <action android:name="android.bluetooth.devicepicker.action.DEVICE_SELECTED" />
                 <action android:name="android.bluetooth.devicepicker.action.LAUNCH" />
+
+                <!-- https://developer.android.com/reference/android/bluetooth/BluetoothHeadset.html -->
                 <action android:name="android.bluetooth.headset.action.VENDOR_SPECIFIC_HEADSET_EVENT" />
                 <action android:name="android.bluetooth.headset.profile.action.AUDIO_STATE_CHANGED" />
                 <action android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
+
+                <!-- https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/bluetooth/BluetoothInputDevice.java -->
                 <action android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
+
+                <!-- https://android.googlesource.com/platform/frameworks/base/+/android-5.0.2_r1/core/java/android/bluetooth/BluetoothPan.java -->
                 <action android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/hardware/Camera.html -->
                 <action android:name="android.hardware.action.NEW_PICTURE" />
                 <action android:name="android.hardware.action.NEW_VIDEO" />
+
+                <!-- https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/hardware/hdmi/HdmiControlManager.java -->
                 <action android:name="android.hardware.hdmi.action.OSD_MESSAGE" />
+
+                <!-- https://developer.android.com/reference/android/hardware/input/InputManager.html -->
                 <action android:name="android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS" />
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+
+                <!-- https://developer.android.com/reference/android/content/Intent.html -->
                 <action android:name="android.intent.action.AIRPLANE_MODE" />
                 <action android:name="android.intent.action.APPLICATION_RESTRICTIONS_CHANGED" />
+                <!-- can not register through manifest -->
                 <action android:name="android.intent.action.BATTERY_CHANGED" />
                 <action android:name="android.intent.action.BATTERY_LOW" />
                 <action android:name="android.intent.action.BATTERY_OKAY" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.CAMERA_BUTTON" />
+                <action android:name="android.intent.action.CLOSE_SYSTEM_DIALOGS" />
+                <!-- can not register through manifest -->
                 <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
-                <action android:name="android.intent.action.CONTENT_CHANGED" />
-                <action android:name="android.intent.action.DATA_SMS_RECEIVED" />
                 <action android:name="android.intent.action.DATE_CHANGED" />
                 <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
                 <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
                 <action android:name="android.intent.action.DOCK_EVENT" />
-                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
-                <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
                 <action android:name="android.intent.action.DREAMING_STARTED" />
                 <action android:name="android.intent.action.DREAMING_STOPPED" />
                 <action android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE" />
                 <action android:name="android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE" />
-                <action android:name="android.intent.action.FETCH_VOICEMAIL" />
                 <action android:name="android.intent.action.GTALK_CONNECTED" />
                 <action android:name="android.intent.action.GTALK_DISCONNECTED" />
-                <action android:name="android.intent.action.HEADSET_PLUG" />
                 <action android:name="android.intent.action.HEADSET_PLUG" />
                 <action android:name="android.intent.action.INPUT_METHOD_CHANGED" />
                 <action android:name="android.intent.action.LOCALE_CHANGED" />
@@ -120,7 +159,8 @@
                 <action android:name="android.intent.action.MEDIA_UNMOUNTED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
-                <action android:name="android.intent.action.NEW_VOICEMAIL" />
+                <action android:name="android.intent.action.PACKAGES_SUSPENDED" />
+                <action android:name="android.intent.action.PACKAGES_UNSUSPENDED" />
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_CHANGED" />
                 <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
@@ -132,58 +172,122 @@
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.PACKAGE_RESTARTED" />
                 <action android:name="android.intent.action.PACKAGE_VERIFIED" />
-                <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
                 <action android:name="android.intent.action.PROVIDER_CHANGED" />
-                <action android:name="android.intent.action.PROXY_CHANGE" />
                 <action android:name="android.intent.action.REBOOT" />
+                <!-- can not register through manifest -->
                 <action android:name="android.intent.action.SCREEN_OFF" />
+                <!-- can not register through manifest -->
                 <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.TIME_SET" />
+                <!-- run every minute -->
+                <!-- <action android:name="android.intent.action.TIME_TICK" /> -->
                 <action android:name="android.intent.action.UID_REMOVED" />
+                <action android:name="android.intent.action.UMS_CONNECTED" />
                 <action android:name="android.intent.action.USER_PRESENT" />
+                <!-- can not register through manifest -->
+                <action android:name="android.intent.action.USER_UNLOCKED" />
                 <action android:name="android.intent.action.WALLPAPER_CHANGED" />
-                <action android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+
+                <!-- https://developer.android.com/reference/android/provider/Telephony.Mms.Intents.html -->
+                <action android:name="android.intent.action.CONTENT_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/app/DownloadManager.html -->
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+                <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
+
+                <!-- https://developer.android.com/reference/android/provider/VoicemailContract.html -->
+                <action android:name="android.intent.action.FETCH_VOICEMAIL" />
+                <action android:name="android.intent.action.NEW_VOICEMAIL" />
+                <action android:name="android.intent.action.SYNC_VOICEMAIL" />
+
+                <!-- https://developer.android.com/reference/android/telephony/TelephonyManager.html -->
+                <action android:name="android.intent.action.PHONE_STATE" />
+
+                <!-- https://developer.android.com/reference/android/net/Proxy.html -->
+                <action android:name="android.intent.action.PROXY_CHANGE" />
+
+                <!-- https://developer.android.com/reference/android/media/AudioManager.html -->
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
-                <action android:name="android.media.RINGER_MODE_CHANGED" />
-                <action android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
-                <action android:name="android.media.VIBRATE_SETTING_CHANGED" />
-                <action android:name="android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION" />
+                <!-- can not register through manifest -->
                 <action android:name="android.media.action.HDMI_AUDIO_PLUG" />
+                <action android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
+                <action android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+                <action android:name="android.media.RINGER_MODE_CHANGED" />
+                <action android:name="android.media.VIBRATE_SETTING_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/media/audiofx/AudioEffect.html -->
+                <action android:name="android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION" />
                 <action android:name="android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION" />
+
+                <!-- https://developer.android.com/reference/android/net/ConnectivityManager.html -->
                 <action android:name="android.net.conn.BACKGROUND_DATA_SETTING_CHANGED" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+
+                <!-- https://developer.android.com/reference/android/net/nsd/NsdManager.html -->
                 <action android:name="android.net.nsd.STATE_CHANGED" />
+
+                <!-- https://chromium.googlesource.com/android_tools/+/2dfa615c860119957bfd2a4711208087575cf92e/sdk/sources/android-21/android/net/NetworkScoreManager.java -->
                 <action android:name="android.net.scoring.SCORER_CHANGED" />
                 <action android:name="android.net.scoring.SCORE_NETWORKS" />
+
+                <!-- https://developer.android.com/reference/android/net/wifi/WifiManager.html -->
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+                <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
+                <action android:name="android.net.wifi.supplicant.STATE_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
                 <action android:name="android.net.wifi.NETWORK_IDS_CHANGED" />
                 <action android:name="android.net.wifi.RSSI_CHANGED" />
                 <action android:name="android.net.wifi.SCAN_RESULTS" />
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/net/wifi/p2p/WifiP2pManager.html -->
                 <action android:name="android.net.wifi.p2p.CONNECTION_STATE_CHANGE" />
                 <action android:name="android.net.wifi.p2p.DISCOVERY_STATE_CHANGE" />
                 <action android:name="android.net.wifi.p2p.PEERS_CHANGED" />
                 <action android:name="android.net.wifi.p2p.STATE_CHANGED" />
                 <action android:name="android.net.wifi.p2p.THIS_DEVICE_CHANGED" />
-                <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
-                <action android:name="android.net.wifi.supplicant.STATE_CHANGE" />
+
+                <!-- https://developer.android.com/reference/android/nfc/NfcAdapter.html -->
                 <action android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/os/PowerManager.html -->
                 <action android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
                 <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
+
+                <!-- https://developer.android.com/reference/android/provider/Telephony.Sms.Intents.html -->
+                <action android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED" />
+                <action android:name="android.provider.action.EXTERNAL_PROVIDER_CHANGE" />
+                <action android:name="android.intent.action.DATA_SMS_RECEIVED" />
                 <action android:name="android.provider.Telephony.SIM_FULL" />
                 <action android:name="android.provider.Telephony.SMS_CB_RECEIVED" />
                 <action android:name="android.provider.Telephony.SMS_DELIVER" />
-                <action android:name="android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED" />
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="android.provider.Telephony.SMS_REJECTED" />
                 <action android:name="android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED" />
                 <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
                 <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED" />
+                <action android:name="android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED" />
+
+                <!-- https://developer.android.com/reference/android/speech/tts/TextToSpeech.html -->
                 <action android:name="android.speech.tts.TTS_QUEUE_PROCESSING_COMPLETED" />
+
+                <!-- https://developer.android.com/reference/android/speech/tts/TextToSpeech.Engine.html -->
                 <action android:name="android.speech.tts.engine.TTS_DATA_INSTALLED" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_receiver" />
         </receiver>
+
+        <activity android:name=".SearchResultsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
