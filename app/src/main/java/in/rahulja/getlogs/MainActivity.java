@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     private void setLogsInListView(ArrayList<String> logArray) {
-        itemsAdapter = new ArrayAdapter<String>(this, R.layout.logs_list_view_item, logArray);
+        itemsAdapter = new ArrayAdapter<String>(this, R.layout.logs_list_view_item, R.id.list_view_item_text, logArray);
         ListView listView = (ListView) findViewById(R.id.list_view_logs);
         if (listView != null) {
             listView.setAdapter(itemsAdapter);
@@ -79,7 +78,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     JSONObject lineObj = new JSONObject(line);
                     String toWrite = lineObj.get("datetime").toString();
                     toWrite += "\n";
-                    toWrite += lineObj.get("action").toString();
+                    String actionName = lineObj.get("action").toString();
+                    int actionSeperator = actionName.lastIndexOf('.');
+                    actionName = actionName.substring(0, actionSeperator)
+                                    + "\n\t"
+                                    + actionName.substring(actionSeperator+1);
+                    toWrite += actionName;
                     if (lineObj.has("data")) {
                         JSONObject dataObj = lineObj.getJSONObject("data");
                         Iterator<String> dataObjKeys = dataObj.keys();
