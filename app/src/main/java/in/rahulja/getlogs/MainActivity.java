@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     private void setLogsInListView(ArrayList<String> logArray) {
-        itemsAdapter = new ArrayAdapter<String>(this, R.layout.logs_list_view_item, R.id.list_view_item_text, logArray);
+        itemsAdapter = new AllLogsArrayAdapter(this, 0, logArray);
         ListView listView = (ListView) findViewById(R.id.list_view_logs);
         if (listView != null) {
             listView.setAdapter(itemsAdapter);
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private ArrayList<String> getLogsArray() {
 
-        ArrayList<String> logArray = new ArrayList<String>();
+        ArrayList<String> logArray = new ArrayList<>();
         File file = new File(Environment.getExternalStorageDirectory() +
                 File.separator + LOG_FOLDER + File.separator + ALL_LOGS_FILE);
 
@@ -84,10 +84,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     String toWrite = lineObj.get("datetime").toString();
                     toWrite += "\n";
                     String actionName = lineObj.get("action").toString();
-                    int actionSeperator = actionName.lastIndexOf('.');
-                    actionName = actionName.substring(0, actionSeperator)
+                    int actionSeparator = actionName.lastIndexOf('.');
+                    actionName = actionName.substring(0, actionSeparator)
                                     + "\n\t"
-                                    + actionName.substring(actionSeperator+1);
+                                    + actionName.substring(actionSeparator+1);
                     toWrite += actionName;
                     if (lineObj.has("data")) {
                         JSONObject dataObj = lineObj.getJSONObject("data");
