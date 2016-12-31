@@ -3,7 +3,6 @@ package in.rahulja.getlogs;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Environment;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,8 +22,6 @@ public class WriteLogIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         String fileName = intent.getExtras().getString("filename");
         String data = intent.getExtras().getString("data");
-        Log.d("asdf", fileName);
-        Log.d("asdf", data);
 
         try {
             File folder = new File(Environment.getExternalStorageDirectory() +

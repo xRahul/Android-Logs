@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="in.rahulja.getlogs">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -15,9 +16,13 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
+    <uses-permission android:name="android.permission.BROADCAST_SMS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -109,8 +114,10 @@
                 <action android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
 
                 <!-- https://developer.android.com/reference/android/hardware/Camera.html -->
-                <action android:name="android.hardware.action.NEW_PICTURE" />
-                <action android:name="android.hardware.action.NEW_VIDEO" />
+                <action android:name="android.hardware.action.NEW_PICTURE"
+                    tools:ignore="BatteryLife" />
+                <action android:name="android.hardware.action.NEW_VIDEO"
+                    tools:ignore="BatteryLife" />
 
                 <!-- https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/hardware/hdmi/HdmiControlManager.java -->
                 <action android:name="android.hardware.hdmi.action.OSD_MESSAGE" />
@@ -283,18 +290,12 @@
                 android:resource="@xml/device_admin_receiver" />
         </receiver>
 
-        <activity android:name=".SearchResultsActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".LogLocationIntentService"
             android:exported="false" />
         <service
             android:name=".WriteLogIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>

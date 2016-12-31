@@ -4,12 +4,12 @@ import android.app.SearchManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     final static String LOG_FOLDER = "AllLogs";
     final static String ALL_LOGS_FILE = "allLogs.txt";
 
-    public ArrayAdapter<String> itemsAdapter;
+    public AllLogsArrayAdapter itemsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +61,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     private void setLogsInListView(ArrayList<String> logArray) {
-        itemsAdapter = new AllLogsArrayAdapter(this, 0, logArray);
-        ListView listView = (ListView) findViewById(R.id.list_view_logs);
-        if (listView != null) {
-            listView.setAdapter(itemsAdapter);
-        }
+        itemsAdapter = new AllLogsArrayAdapter(this, logArray);
+        RecyclerView listView = (RecyclerView) findViewById(R.id.list_view_logs);
+        listView.setLayoutManager(new LinearLayoutManager(this));
+        listView.setHasFixedSize(true);
+        listView.setAdapter(itemsAdapter);
+
     }
 
     private ArrayList<String> getLogsArray() {
@@ -136,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        itemsAdapter.getFilter().filter(newText);
-        return true;
+//        itemsAdapter.getFilter().filter(newText);
+//        return true;
+        return false;
     }
 }
