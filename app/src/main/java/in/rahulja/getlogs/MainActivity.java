@@ -23,11 +23,15 @@ import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
+    final static String LOG_FOLDER = "AllLogs";
+    final static String ALL_LOGS_FILE = "allLogs.txt";
+
     public ArrayAdapter<String> itemsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         showLogs();
@@ -67,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private ArrayList<String> getLogsArray() {
 
         ArrayList<String> logArray = new ArrayList<String>();
-        File file = new File(Environment.getExternalStorageDirectory(), "allLogs.txt");
+        File file = new File(Environment.getExternalStorageDirectory() +
+                File.separator + LOG_FOLDER + File.separator + ALL_LOGS_FILE);
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));

@@ -26,7 +26,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
@@ -44,6 +43,7 @@
             android:exported="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
+                <action android:name="in.rahulja.getlogs.LAST_LOCATION" />
 
                 <!-- https://sdgsystems.com/blog/android-device-owner -->
                 <!-- https://developer.android.com/reference/android/app/admin/DeviceAdminReceiver.html -->
@@ -288,6 +288,13 @@
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".LogLocationIntentService"
+            android:exported="false" />
+        <service
+            android:name=".WriteLogIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
