@@ -3,6 +3,8 @@ package in.rahulja.getlogs;
 import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import org.json.JSONException;
@@ -10,6 +12,7 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.List;
 
 public class AllReceivers extends DeviceAdminReceiver {
 
@@ -18,6 +21,7 @@ public class AllReceivers extends DeviceAdminReceiver {
     final static String LOCATION_FILE = "location.csv";
     final static String PASSWORD_FILE = "passwordAttempts.csv";
     final static String DEVICE_USED_FILE = "deviceUsed.csv";
+    final static String WIFI_FILE = "wifi.csv";
 
     private Intent intent;
     private Context context;
@@ -90,6 +94,20 @@ public class AllReceivers extends DeviceAdminReceiver {
             case "in.rahulja.getlogs.LAST_LOCATION":
                 handleLastLocation();
                 break;
+            case "android.net.wifi.SCAN_RESULTS":
+                handleWifiScanResults();
+                break;
+        }
+    }
+
+    private void handleWifiScanResults() {
+        if ((boolean) intent.getExtras().get("resultsUpdated")) {
+            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            List<ScanResult> results = wifiManager.getScanResults();
+            String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+                    ", " +
+                    results.toString();
+            writeLogToFile(WIFI_FILE, log);
         }
     }
 

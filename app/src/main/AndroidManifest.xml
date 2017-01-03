@@ -133,6 +133,7 @@
                 <action android:name="android.intent.action.BATTERY_LOW" />
                 <action android:name="android.intent.action.BATTERY_OKAY" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="android.intent.action.CAMERA_BUTTON" />
                 <action android:name="android.intent.action.CLOSE_SYSTEM_DIALOGS" />
                 <!-- can not register through manifest -->
@@ -247,8 +248,8 @@
                 <action android:name="android.net.wifi.supplicant.STATE_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
                 <action android:name="android.net.wifi.NETWORK_IDS_CHANGED" />
-                <action android:name="android.net.wifi.RSSI_CHANGED" />
-                <action android:name="android.net.wifi.SCAN_RESULTS" />
+                <!--<action android:name="android.net.wifi.RSSI_CHANGED" />-->
+                <!--<action android:name="android.net.wifi.SCAN_RESULTS" />-->
 
                 <!-- https://developer.android.com/reference/android/net/wifi/p2p/WifiP2pManager.html -->
                 <action android:name="android.net.wifi.p2p.CONNECTION_STATE_CHANGE" />
