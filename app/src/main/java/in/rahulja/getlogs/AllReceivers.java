@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import org.json.JSONException;
@@ -62,7 +64,7 @@ public class AllReceivers extends DeviceAdminReceiver {
         logData.put("data", logExtraData);
       }
     } catch (JSONException e) {
-      e.printStackTrace();
+      Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
     }
 
     /* Log Actions only */
