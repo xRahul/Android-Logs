@@ -41,7 +41,9 @@ class AllLogsHolder extends RecyclerView.ViewHolder implements View.OnClickListe
       ClipboardManager clipboard =
           (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
       ClipData clip = ClipData.newPlainText("log", this.log);
-      clipboard.setPrimaryClip(clip);
+      if (clipboard != null) {
+        clipboard.setPrimaryClip(clip);
+      }
       Toast.makeText(this.context, "Copied Log- \n" + this.log, Toast.LENGTH_SHORT).show();
     }
   }

@@ -14,8 +14,6 @@ class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> {
   private List<String> logs;
 
   AllLogsArrayAdapter(Context context, List<String> objects) {
-    //        super(context, resource, objects);
-
     this.context = context;
     this.logs = objects;
   }
@@ -26,7 +24,11 @@ class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> {
     // 3. Inflate the view and return the new ViewHolder
     LayoutInflater inflater =
         (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-    View view = inflater.inflate(R.layout.logs_list_view_item, parent, false);
+
+    View view = null;
+    if (inflater != null) {
+      view = inflater.inflate(R.layout.logs_list_view_item, parent, false);
+    }
 
     return new AllLogsHolder(this.context, view);
   }

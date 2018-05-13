@@ -3,14 +3,16 @@ package in.rahulja.getlogs;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Environment;
+import android.util.Log;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 
 public class WriteLogIntentService extends IntentService {
 
-  final static String LOG_FOLDER = "AllLogs";
+  private static final String LOG_FOLDER = "AllLogs";
 
   public WriteLogIntentService() {
     super("WriteLogIntentService");
@@ -18,6 +20,9 @@ public class WriteLogIntentService extends IntentService {
 
   @Override
   protected void onHandleIntent(Intent intent) {
+    if (intent.getExtras() == null) {
+      return;
+    }
     String fileName = intent.getExtras().getString("filename");
     String data = intent.getExtras().getString("data");
 
@@ -31,14 +36,13 @@ public class WriteLogIntentService extends IntentService {
           File.separator + LOG_FOLDER + File.separator + fileName);
       //noinspection ResultOfMethodCallIgnored
       myFile.createNewFile();
-      FileOutputStream fOut = new FileOutputStream(myFile, true);
-      OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-      myOutWriter.append(data);
-      myOutWriter.append("\n");
-      myOutWriter.close();
-      fOut.close();
+      try (OutputStreamWriter myOutWriter = new OutputStreamWriter(
+          new FileOutputStream(myFile, true))) {
+        myOutWriter.append(data);
+        myOutWriter.append("\n");
+      }
     } catch (IOException e) {
-      e.printStackTrace();
+      Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
     }
   }
 }

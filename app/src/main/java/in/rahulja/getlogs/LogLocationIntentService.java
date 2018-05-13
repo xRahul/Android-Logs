@@ -21,7 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class LogLocationIntentService extends IntentService
     implements ConnectionCallbacks, OnConnectionFailedListener {
 
-  final static String locationAction = "in.rahulja.getlogs.LAST_LOCATION";
+  private static final String LOCATION_ACTION = "in.rahulja.getlogs.LAST_LOCATION";
   GoogleApiClient mGoogleApiClient;
   Location mLastLocation;
   String mLatitude;
@@ -51,6 +51,7 @@ public class LogLocationIntentService extends IntentService
 
   @Override
   protected void onHandleIntent(Intent intent) {
+    //override
   }
 
   @Override
@@ -75,7 +76,7 @@ public class LogLocationIntentService extends IntentService
     }
 
     Intent intent = new Intent();
-    intent.setAction(locationAction);
+    intent.setAction(LOCATION_ACTION);
     intent.putExtra("latitude", mLatitude);
     intent.putExtra("longitude", mLongitude);
 
@@ -93,6 +94,7 @@ public class LogLocationIntentService extends IntentService
 
   @Override
   public void onConnectionSuspended(int i) {
+    //override
   }
 
   @Override
