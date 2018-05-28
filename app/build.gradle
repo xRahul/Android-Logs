@@ -32,7 +32,7 @@ dependencies {
   compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
   compile "com.google.android.gms:play-services-base:${rootProject.ext.googlePlayServicesVersion}"
   compile "com.google.android.gms:play-services-location:${rootProject.ext.googlePlayServicesVersion}"
-  compile 'com.android.support:multidex:1.0.0'
+  compile 'com.android.support:multidex:1.0.3'
 
   testCompile 'junit:junit:4.12'
 }
