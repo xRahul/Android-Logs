@@ -34,5 +34,5 @@ dependencies {
   compile "com.google.android.gms:play-services-location:${rootProject.ext.googlePlayServicesVersion}"
   compile 'com.android.support:multidex:1.0.3'
 
-  testCompile 'junit:junit:4.12'
+  testCompile 'junit:junit:4.13.1'
 }
