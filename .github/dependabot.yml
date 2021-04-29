@@ -1,0 +1,13 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "21:00"
+    timezone: Asia/Calcutta
+  open-pull-requests-limit: 50
+  ignore:
+  - dependency-name: junit:junit
+    versions:
+    - 4.13.1
