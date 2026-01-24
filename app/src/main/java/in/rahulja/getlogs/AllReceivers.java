@@ -8,6 +8,10 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -144,8 +148,9 @@ public class AllReceivers extends DeviceAdminReceiver {
 
   private void handleCloseSystemDialogs() {
 
-    Intent mServiceIntent = new Intent(context, LogLocationIntentService.class);
-    context.startService(mServiceIntent);
+    OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(LogLocationWorker.class)
+        .build();
+    WorkManager.getInstance(context).enqueue(request);
 
     String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
         ", LOCKED";
@@ -159,9 +164,17 @@ public class AllReceivers extends DeviceAdminReceiver {
   }
 
   private void writeLogToFile(String fileName, String data) {
-    Intent mServiceIntent = new Intent(context, WriteLogIntentService.class);
-    mServiceIntent.putExtra("filename", fileName);
-    mServiceIntent.putExtra("data", data);
-    context.startService(mServiceIntent);
+    Data inputData = new Data.Builder()
+        .putString("filename", fileName)
+        .putString("data", data)
+        .build();
+
+    OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(WriteLogWorker.class)
+        .setInputData(inputData)
+        .build();
+
+    WorkManager.getInstance(context)
+        .beginUniqueWork("write_logs", ExistingWorkPolicy.APPEND, request)
+        .enqueue();
   }
 }
