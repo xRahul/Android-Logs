@@ -114,6 +114,9 @@ public class AllReceivers extends DeviceAdminReceiver {
       WifiManager wifiManager = (WifiManager) context.getApplicationContext()
           .getSystemService(Context.WIFI_SERVICE);
       if (wifiManager != null) {
+        if (androidx.core.app.ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+          return;
+        }
         List<ScanResult> results = wifiManager.getScanResults();
         String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
             ", " +
