@@ -3,11 +3,11 @@ package in.rahulja.getlogs;
 import android.app.SearchManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,8 +73,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
   private ArrayList<String> getLogsArray() {
 
     ArrayList<String> logArray = new ArrayList<>();
-    File file = new File(Environment.getExternalStorageDirectory() +
-        File.separator + LOG_FOLDER + File.separator + ALL_LOGS_FILE);
+    File file = new File(getExternalFilesDir(null), LOG_FOLDER + File.separator + ALL_LOGS_FILE);
 
     try (BufferedReader br = new BufferedReader(new FileReader(file))) {
       String line;
