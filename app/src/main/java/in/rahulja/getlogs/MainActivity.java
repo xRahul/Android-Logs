@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,12 +79,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     try (BufferedReader br = new BufferedReader(new FileReader(file))) {
       String line;
       while ((line = br.readLine()) != null) {
-        logArray.add(0, getLogLineForArray(line));
+        logArray.add(getLogLineForArray(line));
       }
     } catch (IOException e) {
       Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
     }
 
+    Collections.reverse(logArray);
     return logArray;
   }
 
