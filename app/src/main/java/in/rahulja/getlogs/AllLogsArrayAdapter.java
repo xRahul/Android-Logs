@@ -3,25 +3,28 @@ package in.rahulja.getlogs;
 import android.app.Activity;
 import android.content.Context;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import java.util.ArrayList;
 import java.util.List;
 
-class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> {
+class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> implements Filterable {
 
   private Context context;
   private List<String> logs;
+  private List<String> logsFiltered;
 
   AllLogsArrayAdapter(Context context, List<String> objects) {
     this.context = context;
     this.logs = objects;
+    this.logsFiltered = objects;
   }
 
-  // 2. Override the onCreateViewHolder method
   @Override
   public AllLogsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    // 3. Inflate the view and return the new ViewHolder
     LayoutInflater inflater =
         (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
@@ -33,19 +36,45 @@ class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> {
     return new AllLogsHolder(this.context, view);
   }
 
-  // 4. Override the onBindViewHolder method
   @Override
   public void onBindViewHolder(AllLogsHolder holder, int position) {
-
-    // 5. Use position to access the correct Bakery object
-    String log = this.logs.get(position);
-
-    // 6. Bind the bakery object to the holder
+    String log = this.logsFiltered.get(position);
     holder.bindLog(log);
   }
 
   @Override
   public int getItemCount() {
-    return this.logs.size();
+    return this.logsFiltered.size();
+  }
+
+  @Override
+  public Filter getFilter() {
+    return new Filter() {
+      @Override
+      protected FilterResults performFiltering(CharSequence charSequence) {
+        String charString = charSequence.toString();
+        if (charString.isEmpty()) {
+          logsFiltered = logs;
+        } else {
+          List<String> filteredList = new ArrayList<>();
+          for (String row : logs) {
+            if (row.toLowerCase().contains(charString.toLowerCase())) {
+              filteredList.add(row);
+            }
+          }
+          logsFiltered = filteredList;
+        }
+
+        FilterResults filterResults = new FilterResults();
+        filterResults.values = logsFiltered;
+        return filterResults;
+      }
+
+      @Override
+      protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+        logsFiltered = (List<String>) filterResults.values;
+        notifyDataSetChanged();
+      }
+    };
   }
 }

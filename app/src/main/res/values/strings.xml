@@ -3,4 +3,5 @@
     <string name="view_logs_button">View Logs</string>
     <string name="search_title">Worship the Logs</string>
     <string name="search_hint">Worship the Logs</string>
+    <string name="no_logs_found">No logs available yet. Generate some activity on your device!</string>
 </resources>
