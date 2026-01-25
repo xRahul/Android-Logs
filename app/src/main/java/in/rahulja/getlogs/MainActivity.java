@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -63,10 +64,19 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
   private void setLogsInListView(ArrayList<String> logArray) {
     AllLogsArrayAdapter itemsAdapter = new AllLogsArrayAdapter(this, logArray);
     RecyclerView listView = (RecyclerView) findViewById(R.id.list_view_logs);
-    if (listView != null) {
-      listView.setLayoutManager(new LinearLayoutManager(this));
-      listView.setHasFixedSize(true);
-      listView.setAdapter(itemsAdapter);
+    TextView emptyView = (TextView) findViewById(R.id.empty_view);
+
+    if (listView != null && emptyView != null) {
+      if (logArray.isEmpty()) {
+        listView.setVisibility(View.GONE);
+        emptyView.setVisibility(View.VISIBLE);
+      } else {
+        listView.setVisibility(View.VISIBLE);
+        emptyView.setVisibility(View.GONE);
+        listView.setLayoutManager(new LinearLayoutManager(this));
+        listView.setHasFixedSize(true);
+        listView.setAdapter(itemsAdapter);
+      }
     }
   }
 
