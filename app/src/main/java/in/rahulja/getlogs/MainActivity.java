@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
@@ -78,19 +79,23 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
   }
 
   private ArrayList<String> getLogsArray() {
-
-    ArrayList<String> logArray = new ArrayList<>();
     File file = new File(getExternalFilesDir(null), LOG_FOLDER + File.separator + ALL_LOGS_FILE);
+    return readLogsFromFile(file);
+  }
+
+  ArrayList<String> readLogsFromFile(File file) {
+    ArrayList<String> logArray = new ArrayList<>();
 
     try (BufferedReader br = new BufferedReader(new FileReader(file))) {
       String line;
       while ((line = br.readLine()) != null) {
-        logArray.add(0, LogParser.getLogLineForArray(line));
+        logArray.add(LogParser.getLogLineForArray(line));
       }
     } catch (IOException e) {
       Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
     }
 
+    Collections.reverse(logArray);
     return logArray;
   }
 
