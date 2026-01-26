@@ -14,7 +14,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import java.text.DateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +27,13 @@ public class AllReceivers extends DeviceAdminReceiver {
   private static final String PASS_WORD_FILE = "passwordAttempts.csv";
   private static final String DEVICE_USED_FILE = "deviceUsed.csv";
   private static final String WIFI_FILE = "wifi.csv";
+
+  private static final ThreadLocal<DateFormat> DATE_FORMATTER = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return DateFormat.getDateTimeInstance();
+    }
+  };
 
   private Intent intent;
   private Context context;
@@ -53,7 +60,7 @@ public class AllReceivers extends DeviceAdminReceiver {
       logData.put("action", intent.getAction());
       logData.put(
           "datetime",
-          DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime())
+          DATE_FORMATTER.get().format(new Date())
       );
 
       Bundle intentExtras = intent.getExtras();
@@ -74,7 +81,7 @@ public class AllReceivers extends DeviceAdminReceiver {
     /* Log Actions only */
     writeLogToFile(
         ALL_ACTIONS_FILE,
-        DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+        DATE_FORMATTER.get().format(new Date()) +
             ", " +
             intent.getAction()
     );
@@ -118,7 +125,7 @@ public class AllReceivers extends DeviceAdminReceiver {
           return;
         }
         List<ScanResult> results = wifiManager.getScanResults();
-        String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+        String log = DATE_FORMATTER.get().format(new Date()) +
             ", " +
             results.toString();
         writeLogToFile(WIFI_FILE, log);
@@ -128,7 +135,7 @@ public class AllReceivers extends DeviceAdminReceiver {
 
   private void handleLastLocation() {
     if (intent.getExtras() != null) {
-      String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+      String log = DATE_FORMATTER.get().format(new Date()) +
           ", " +
           intent.getExtras().getString("latitude") +
           ", " +
@@ -138,13 +145,13 @@ public class AllReceivers extends DeviceAdminReceiver {
   }
 
   private void handleActionPasswordFailed() {
-    String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+    String log = DATE_FORMATTER.get().format(new Date()) +
         ", FAILED";
     writeLogToFile(PASS_WORD_FILE, log);
   }
 
   private void handleActionPasswordSucceeded() {
-    String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+    String log = DATE_FORMATTER.get().format(new Date()) +
         ", SUCCEEDED";
     writeLogToFile(PASS_WORD_FILE, log);
   }
@@ -155,13 +162,13 @@ public class AllReceivers extends DeviceAdminReceiver {
         .build();
     WorkManager.getInstance(context).enqueue(request);
 
-    String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+    String log = DATE_FORMATTER.get().format(new Date()) +
         ", LOCKED";
     writeLogToFile(DEVICE_USED_FILE, log);
   }
 
   private void handleUserPresentAction() {
-    String log = DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime()) +
+    String log = DATE_FORMATTER.get().format(new Date()) +
         ", UNLOCKED";
     writeLogToFile(DEVICE_USED_FILE, log);
   }
