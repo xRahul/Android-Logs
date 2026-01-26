@@ -17,12 +17,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
   private static final String LOG_FOLDER = "AllLogs";
   private static final String ALL_LOGS_FILE = "allLogs.txt";
 
+  private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private AllLogsArrayAdapter itemsAdapter;
 
   @Override
@@ -32,6 +36,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     setContentView(R.layout.activity_main);
 
     showLogs();
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    executor.shutdownNow();
   }
 
   @Override
@@ -55,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
   }
 
   private void showLogs() {
-    setLogsInListView(getLogsArray());
+    loadLogs();
   }
 
   private void setLogsInListView(ArrayList<String> logArray) {
@@ -77,21 +87,31 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
   }
 
-  private ArrayList<String> getLogsArray() {
+  private void loadLogs() {
+    executor.execute(() -> {
+      ArrayList<String> logArray = new ArrayList<>();
+      File file = new File(getExternalFilesDir(null), LOG_FOLDER + File.separator + ALL_LOGS_FILE);
 
-    ArrayList<String> logArray = new ArrayList<>();
-    File file = new File(getExternalFilesDir(null), LOG_FOLDER + File.separator + ALL_LOGS_FILE);
-
-    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-      String line;
-      while ((line = br.readLine()) != null) {
-        logArray.add(0, LogParser.getLogLineForArray(line));
+      try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        String line;
+        while ((line = br.readLine()) != null && !Thread.currentThread().isInterrupted()) {
+          logArray.add(LogParser.getLogLineForArray(line));
+        }
+        if (!Thread.currentThread().isInterrupted()) {
+          Collections.reverse(logArray);
+        }
+      } catch (IOException e) {
+        Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
       }
-    } catch (IOException e) {
-      Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
-    }
 
-    return logArray;
+      if (!Thread.currentThread().isInterrupted()) {
+        runOnUiThread(() -> {
+          if (!isFinishing() && !isDestroyed()) {
+            setLogsInListView(logArray);
+          }
+        });
+      }
+    });
   }
 
   @Override
