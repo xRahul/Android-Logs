@@ -6,6 +6,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import android.util.Log;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -31,19 +32,24 @@ public class WriteLogWorker extends Worker {
 
     try {
       File folder = new File(getApplicationContext().getExternalFilesDir(null), LOG_FOLDER);
-      if (!folder.exists()) {
-        folder.mkdirs();
-      }
-
       File myFile = new File(folder, fileName);
-      if (!myFile.exists()) {
-        myFile.createNewFile();
-      }
 
-      try (OutputStreamWriter myOutWriter = new OutputStreamWriter(
-          new FileOutputStream(myFile, true))) {
-        myOutWriter.append(data);
-        myOutWriter.append("\n");
+      try {
+        try (OutputStreamWriter myOutWriter = new OutputStreamWriter(
+            new FileOutputStream(myFile, true))) {
+          myOutWriter.append(data);
+          myOutWriter.append("\n");
+        }
+      } catch (FileNotFoundException e) {
+        if (!folder.exists() && folder.mkdirs()) {
+          try (OutputStreamWriter myOutWriter = new OutputStreamWriter(
+              new FileOutputStream(myFile, true))) {
+            myOutWriter.append(data);
+            myOutWriter.append("\n");
+          }
+        } else {
+          throw e;
+        }
       }
     } catch (IOException e) {
       Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
