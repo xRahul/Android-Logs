@@ -1,10 +1,13 @@
 package in.rahulja.getlogs;
 
 import java.util.Iterator;
+import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LogParser {
+
+  private static final Pattern COMMA_SPACE_PATTERN = Pattern.compile(", ");
 
   public static String getLogLineForArray(String line) {
     StringBuilder lineToWrite = new StringBuilder();
@@ -46,7 +49,7 @@ public class LogParser {
     if (value.length() > 0 && value.charAt(0) == '[') {
       if (value.length() > 2) {
         value = new StringBuilder(value.substring(1, value.length() - 1));
-        String[] parts = value.toString().split(", ");
+        String[] parts = COMMA_SPACE_PATTERN.split(value);
         value = new StringBuilder();
         for (String str : parts) {
           value.append("\n\t\t\t\t").append(str);
@@ -57,7 +60,7 @@ public class LogParser {
       }
     }
     if (key.equals("wifiInfo")) {
-      String[] parts = value.toString().split(", ");
+      String[] parts = COMMA_SPACE_PATTERN.split(value);
       value = new StringBuilder();
       for (String str : parts) {
         value.append("\n\t\t\t\t").append(str);
