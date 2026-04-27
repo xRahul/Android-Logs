@@ -16,11 +16,24 @@ class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> implements
   private Context context;
   private List<String> logs;
   private List<String> logsFiltered;
+  private CharSequence currentQuery = "";
 
   AllLogsArrayAdapter(Context context, List<String> objects) {
     this.context = context;
     this.logs = objects;
     this.logsFiltered = objects;
+  }
+
+  public void addLogs(List<String> newLogs) {
+    this.logs.addAll(newLogs);
+    if (currentQuery == null || currentQuery.length() == 0) {
+      if (this.logsFiltered != this.logs) {
+        this.logsFiltered = this.logs;
+      }
+      notifyDataSetChanged();
+    } else {
+      getFilter().filter(currentQuery);
+    }
   }
 
   @Override
@@ -72,6 +85,7 @@ class AllLogsArrayAdapter extends RecyclerView.Adapter<AllLogsHolder> implements
 
       @Override
       protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+        currentQuery = charSequence;
         logsFiltered = (List<String>) filterResults.values;
         notifyDataSetChanged();
       }

@@ -11,13 +11,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,15 +23,32 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
   private static final String LOG_FOLDER = "AllLogs";
   private static final String ALL_LOGS_FILE = "allLogs.txt";
+  private static final int PAGE_SIZE = 100;
 
   private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private AllLogsArrayAdapter itemsAdapter;
+  private ReverseLogReader logReader;
+  private volatile boolean isLoadingMore = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_main);
+
+    RecyclerView listView = (RecyclerView) findViewById(R.id.list_view_logs);
+    listView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+      @Override
+      public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        super.onScrolled(recyclerView, dx, dy);
+        if (!isLoadingMore && itemsAdapter != null && dy > 0) {
+          LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+          if (layoutManager != null && layoutManager.findLastVisibleItemPosition() >= itemsAdapter.getItemCount() - 5) {
+            loadMoreLogs();
+          }
+        }
+      }
+    });
 
     showLogs();
   }
@@ -42,6 +57,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
   protected void onDestroy() {
     super.onDestroy();
     executor.shutdownNow();
+    if (logReader != null) {
+      try {
+        logReader.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
@@ -92,13 +114,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
       ArrayList<String> logArray = new ArrayList<>();
       File file = new File(getExternalFilesDir(null), LOG_FOLDER + File.separator + ALL_LOGS_FILE);
 
-      try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-        String line;
-        while ((line = br.readLine()) != null && !Thread.currentThread().isInterrupted()) {
-          logArray.add(LogParser.getLogLineForArray(line));
+      try {
+        if (logReader != null) {
+          logReader.close();
         }
-        if (!Thread.currentThread().isInterrupted()) {
-          Collections.reverse(logArray);
+        logReader = new ReverseLogReader(file);
+        List<String> rawLines = logReader.readLines(PAGE_SIZE);
+        for (String line : rawLines) {
+          logArray.add(LogParser.getLogLineForArray(line));
         }
       } catch (IOException e) {
         Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
@@ -110,6 +133,38 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             setLogsInListView(logArray);
           }
         });
+      }
+    });
+  }
+
+  private void loadMoreLogs() {
+    if (isLoadingMore || logReader == null) {
+      return;
+    }
+    isLoadingMore = true;
+
+    executor.execute(() -> {
+      try {
+        List<String> rawLines = logReader.readLines(PAGE_SIZE);
+        if (rawLines.isEmpty()) {
+          isLoadingMore = false;
+          return;
+        }
+
+        ArrayList<String> parsedLogs = new ArrayList<>();
+        for (String line : rawLines) {
+          parsedLogs.add(LogParser.getLogLineForArray(line));
+        }
+
+        runOnUiThread(() -> {
+          if (!isFinishing() && !isDestroyed() && itemsAdapter != null) {
+            itemsAdapter.addLogs(parsedLogs);
+          }
+          isLoadingMore = false;
+        });
+      } catch (IOException e) {
+        Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
+        isLoadingMore = false;
       }
     });
   }
