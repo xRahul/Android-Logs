@@ -8,14 +8,18 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,6 +31,9 @@ public class AllReceivers extends DeviceAdminReceiver {
   private static final String PASS_WORD_FILE = "passwordAttempts.csv";
   private static final String DEVICE_USED_FILE = "deviceUsed.csv";
   private static final String WIFI_FILE = "wifi.csv";
+  private static final String LOG_FOLDER = "AllLogs";
+
+  private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
   private static final ThreadLocal<DateFormat> DATE_FORMATTER = new ThreadLocal<DateFormat>() {
     @Override
@@ -45,11 +52,18 @@ public class AllReceivers extends DeviceAdminReceiver {
   @SuppressLint("UnsafeProtectedBroadcastReceiver")
   @Override
   public void onReceive(Context contextReceived, Intent receivedIntent) {
+    final PendingResult pendingResult = goAsync();
     context = contextReceived;
     intent = receivedIntent;
 
-    logAllActions();
-    logActionSeparately();
+    try {
+      logAllActions();
+      logActionSeparately();
+    } finally {
+      if (pendingResult != null) {
+        EXECUTOR.execute(pendingResult::finish);
+      }
+    }
   }
 
   private void logAllActions() {
@@ -174,17 +188,31 @@ public class AllReceivers extends DeviceAdminReceiver {
   }
 
   private void writeLogToFile(String fileName, String data) {
-    Data inputData = new Data.Builder()
-        .putString("filename", fileName)
-        .putString("data", data)
-        .build();
+    final Context appContext = context.getApplicationContext();
+    EXECUTOR.execute(() -> {
+      if (fileName == null || data == null) {
+        return;
+      }
 
-    OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(WriteLogWorker.class)
-        .setInputData(inputData)
-        .build();
+      try {
+        File folder = new File(appContext.getExternalFilesDir(null), LOG_FOLDER);
+        if (!folder.exists()) {
+          folder.mkdirs();
+        }
 
-    WorkManager.getInstance(context)
-        .beginUniqueWork("write_logs", ExistingWorkPolicy.APPEND, request)
-        .enqueue();
+        File myFile = new File(folder, fileName);
+        if (!myFile.exists()) {
+          myFile.createNewFile();
+        }
+
+        try (OutputStreamWriter myOutWriter = new OutputStreamWriter(
+            new FileOutputStream(myFile, true))) {
+          myOutWriter.append(data);
+          myOutWriter.append("\n");
+        }
+      } catch (IOException e) {
+        Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
+      }
+    });
   }
 }

@@ -48,8 +48,8 @@ public class LogParser {
     StringBuilder value = new StringBuilder(dataObj.get(key).toString());
     if (value.length() > 0 && value.charAt(0) == '[') {
       if (value.length() > 2) {
-        value = new StringBuilder(value.substring(1, value.length() - 1));
-        String[] parts = COMMA_SPACE_PATTERN.split(value);
+        value.deleteCharAt(value.length() - 1);
+        String[] parts = COMMA_SPACE_PATTERN.split(value.substring(1));
         value = new StringBuilder();
         for (String str : parts) {
           value.append("\n\t\t\t\t").append(str);
