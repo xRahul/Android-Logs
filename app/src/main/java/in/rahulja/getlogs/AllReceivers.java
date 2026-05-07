@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -89,7 +88,7 @@ public class AllReceivers extends DeviceAdminReceiver {
         logData.put("data", logExtraData);
       }
     } catch (JSONException e) {
-      Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
+      Log.e("Android-Logs", "Error logging all actions", e);
     }
 
     /* Log Actions only */
@@ -211,7 +210,7 @@ public class AllReceivers extends DeviceAdminReceiver {
           myOutWriter.append("\n");
         }
       } catch (IOException e) {
-        Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
+        Log.e("Android-Logs", "Error writing log to file", e);
       }
     });
   }
