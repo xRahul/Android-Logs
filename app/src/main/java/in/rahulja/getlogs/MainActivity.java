@@ -14,7 +14,6 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -124,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
           logArray.add(LogParser.getLogLineForArray(line));
         }
       } catch (IOException e) {
-        Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
+        Log.e("Android-Logs", "Error loading logs", e);
       }
 
       if (!Thread.currentThread().isInterrupted()) {
@@ -163,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
           isLoadingMore = false;
         });
       } catch (IOException e) {
-        Log.e("Android-Logs", Arrays.toString(e.getStackTrace()));
+        Log.e("Android-Logs", "Error loading more logs", e);
         isLoadingMore = false;
       }
     });
