@@ -158,4 +158,15 @@ class LogRepositoryTest {
         val searchPagingDataFlow = repository.getLogsPaging(query = "ACTION_1")
         assertNotNull(searchPagingDataFlow.first())
     }
+
+    @Test
+    fun clearAllLogsDeletesAllLogsAndCountUpdates() = runBlocking {
+        repository.recordLog("ACTION_1")
+        repository.recordLog("ACTION_2")
+        assertEquals(2L, repository.getLogsCount())
+
+        repository.clearAllLogs()
+        assertEquals(0L, repository.getLogsCount())
+        assertTrue(repository.getAllLogs().isEmpty())
+    }
 }

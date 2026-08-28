@@ -17,6 +17,7 @@ import org.json.JSONObject
 import java.text.DateFormat
 import java.util.Date
 
+@Suppress("TooManyFunctions")
 class LogRepository(
     private val logDao: LogDao,
     private val legacyFileWriter: LegacyFileWriter,
@@ -87,6 +88,14 @@ class LogRepository(
         } else {
             logDao.searchLogsList(formatSearchQuery(query))
         }
+    }
+
+    suspend fun clearAllLogs() = withContext(ioDispatcher) {
+        logDao.deleteAll()
+    }
+
+    suspend fun getLogsCount(): Long = withContext(ioDispatcher) {
+        logDao.count().toLong()
     }
 
     private fun formatSearchQuery(query: String): String {
