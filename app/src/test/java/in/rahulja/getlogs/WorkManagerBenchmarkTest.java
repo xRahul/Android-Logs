@@ -2,6 +2,7 @@ package in.rahulja.getlogs;
 
 import android.content.Context;
 import android.content.Intent;
+import in.rahulja.getlogs.receiver.AllReceivers;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.work.Configuration;
 import androidx.work.testing.WorkManagerTestInitHelper;
@@ -19,14 +20,6 @@ public class WorkManagerBenchmarkTest {
     @Before
     public void setUp() {
         context = ApplicationProvider.getApplicationContext();
-
-        // Initialize WorkManager for testing
-        Configuration config = new Configuration.Builder()
-                .setMinimumLoggingLevel(android.util.Log.DEBUG)
-                .setExecutor(new androidx.work.testing.SynchronousExecutor())
-                .build();
-        WorkManagerTestInitHelper.initializeTestWorkManager(context, config);
-
         allReceivers = new AllReceivers();
     }
 

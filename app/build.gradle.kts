@@ -54,6 +54,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 detekt {
@@ -64,6 +71,11 @@ detekt {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed", "standardError")
+        showExceptions = true
+        showStackTraces = true
+    }
 }
 
 dependencies {
