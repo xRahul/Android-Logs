@@ -67,6 +67,8 @@ tasks.withType<Test> {
 }
 
 dependencies {
+    detektPlugins(libs.detekt.formatting)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -104,6 +106,7 @@ dependencies {
     // Testing
     testImplementation(libs.junit4)
     testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.robolectric)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)

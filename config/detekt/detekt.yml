@@ -20,6 +20,13 @@ complexity:
     ignorePrivate: false
     ignoreOverridden: false
 
+naming:
+  active: true
+  PackageNaming:
+    active: false
+
 formatting:
   active: true
   android: true
+  PackageName:
+    active: false
