@@ -117,6 +117,31 @@ class AllReceiversTest {
                 logType = LogType.GENERAL
             )
         }
+
+        io.mockk.verify(exactly = 1) { mockWorkManager.enqueue(any<androidx.work.WorkRequest>()) }
+    }
+
+    @Test
+    fun testReceiveUserPresentEnqueuesWorker() = testScope.runTest {
+        val receiver = AllReceivers(
+            logRepositoryProvider = { logRepository },
+            coroutineScope = this,
+            workManagerProvider = { mockWorkManager }
+        )
+
+        val intent = Intent(Intent.ACTION_USER_PRESENT)
+        receiver.onReceive(context, intent)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) {
+            logRepository.recordLog(
+                action = Intent.ACTION_USER_PRESENT,
+                dataPayload = any(),
+                logType = LogType.GENERAL
+            )
+        }
+
+        io.mockk.verify(exactly = 1) { mockWorkManager.enqueue(any<androidx.work.WorkRequest>()) }
     }
 
     @Test

@@ -13,7 +13,7 @@ import `in`.rahulja.getlogs.data.LogRepository
 import `in`.rahulja.getlogs.model.LogType
 import org.json.JSONObject
 
-class LogLocationWorker(
+class LogLocationWorker @JvmOverloads constructor(
     appContext: Context,
     params: WorkerParameters,
     logRepo: LogRepository? = null,
