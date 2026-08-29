@@ -186,7 +186,7 @@ class MainViewModelTest {
             )
         )
 
-        every { repository.getLogsPaging(any()) } returns flowOf(dummyPagingData)
+        every { repository.getLogsPaging(any(), any()) } returns flowOf(dummyPagingData)
 
         val viewModel = MainViewModel(repository, testDispatcher)
 
@@ -206,7 +206,26 @@ class MainViewModelTest {
             advanceTimeBy(350)
             assertNotNull(awaitItem())
 
-            coVerify { repository.getLogsPaging("ABC") }
+            coVerify { repository.getLogsPaging("ABC", null) }
+        }
+    }
+
+    @Test
+    fun logsPagingFlowReactsToLogTypeSelection() = runTest(testDispatcher) {
+        val dummyPagingData = PagingData.from(emptyList<LogEntity>())
+        every { repository.getLogsPaging(any(), any()) } returns flowOf(dummyPagingData)
+
+        val viewModel = MainViewModel(repository, testDispatcher)
+
+        viewModel.logsPagingFlow.test {
+            advanceTimeBy(350)
+            assertNotNull(awaitItem())
+
+            viewModel.onLogTypeFilterSelected(LogType.WIFI)
+            advanceTimeBy(350)
+            assertNotNull(awaitItem())
+
+            coVerify { repository.getLogsPaging(null, LogType.WIFI) }
         }
     }
 

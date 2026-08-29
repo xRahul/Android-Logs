@@ -24,19 +24,22 @@ class LogRepository(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
 
-    fun getLogsPaging(query: String? = null): Flow<PagingData<LogEntity>> {
+    fun getLogsPaging(
+        query: String? = null,
+        logType: LogType? = null
+    ): Flow<PagingData<LogEntity>> {
         val config = PagingConfig(
             pageSize = PAGE_SIZE,
             enablePlaceholders = false
         )
         return if (query.isNullOrBlank()) {
             Pager(config = config) {
-                logDao.getAllLogsPaging()
+                logDao.getAllLogsPaging(logType)
             }.flow
         } else {
             val ftsQuery = formatSearchQuery(query)
             Pager(config = config) {
-                logDao.searchLogsPaging(ftsQuery)
+                logDao.searchLogsPaging(ftsQuery, logType)
             }.flow
         }
     }

@@ -38,11 +38,14 @@ class MainViewModel(
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val logsPagingFlow: Flow<PagingData<LogEntity>> = _uiState
-        .map { it.searchQuery }
+        .map { Pair(it.searchQuery, it.selectedLogType) }
         .distinctUntilChanged()
         .debounce(DEBOUNCE_MILLIS)
-        .flatMapLatest { query ->
-            repository.getLogsPaging(query.ifBlank { null })
+        .flatMapLatest { (query, logType) ->
+            repository.getLogsPaging(
+                query = query.ifBlank { null },
+                logType = logType
+            )
         }
         .cachedIn(viewModelScope)
 

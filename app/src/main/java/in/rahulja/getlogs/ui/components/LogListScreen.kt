@@ -420,9 +420,7 @@ fun LogsListContent(
                     key = pagingItems.itemKey { it.id }
                 ) { index ->
                     val log = pagingItems[index]
-                    if (log != null &&
-                        (uiState.selectedLogType == null || log.logType == uiState.selectedLogType)
-                    ) {
+                    if (log != null) {
                         LogItemCard(
                             log = log,
                             onLogCopied = onLogCopied

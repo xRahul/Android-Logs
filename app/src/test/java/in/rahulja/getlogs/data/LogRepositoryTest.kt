@@ -155,6 +155,9 @@ class LogRepositoryTest {
         val pagingDataFlow = repository.getLogsPaging(query = null)
         assertNotNull(pagingDataFlow.first())
 
+        val typePagingDataFlow = repository.getLogsPaging(query = null, logType = LogType.GENERAL)
+        assertNotNull(typePagingDataFlow.first())
+
         val searchPagingDataFlow = repository.getLogsPaging(query = "ACTION_1")
         assertNotNull(searchPagingDataFlow.first())
     }

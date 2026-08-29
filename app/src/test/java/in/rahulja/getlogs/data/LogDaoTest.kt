@@ -193,6 +193,39 @@ class LogDaoTest {
     }
 
     @Test
+    fun pagingSourceWithLogTypeFilter() = runBlocking {
+        val log1 = LogEntity(
+            timestamp = 1000L,
+            action = "in.rahulja.getlogs.LOCATION",
+            dataPayload = """{"latitude":"37.7749","longitude":"-122.4194"}""",
+            logType = LogType.LOCATION,
+            formattedText = "Location: 37.7749"
+        )
+        val log2 = LogEntity(
+            timestamp = 2000L,
+            action = "android.intent.action.SCREEN_ON",
+            dataPayload = "{}",
+            logType = LogType.GENERAL,
+            formattedText = "SCREEN_ON"
+        )
+        logDao.insert(log1)
+        logDao.insert(log2)
+
+        val locationPaging = logDao.getAllLogsPaging(LogType.LOCATION)
+        val locationResult = locationPaging.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 10, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page<Int, LogEntity>
+        assertEquals(1, locationResult.data.size)
+        assertEquals("in.rahulja.getlogs.LOCATION", locationResult.data[0].action)
+
+        val wifiPaging = logDao.getAllLogsPaging(LogType.WIFI)
+        val wifiResult = wifiPaging.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 10, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page<Int, LogEntity>
+        assertEquals(0, wifiResult.data.size)
+    }
+
+    @Test
     fun helperMethodsCountAndGetByIdAndClear() = runBlocking {
         val log = LogEntity(
             timestamp = 3000L,
