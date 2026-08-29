@@ -1,6 +1,7 @@
 package `in`.rahulja.getlogs.ui
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import `in`.rahulja.getlogs.data.LogRepository
 import `in`.rahulja.getlogs.model.LogEntity
 import `in`.rahulja.getlogs.model.LogType
 import `in`.rahulja.getlogs.service.TelemetryService
+import `in`.rahulja.getlogs.util.LogExporter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +29,8 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val repository: LogRepository,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val logExporter: LogExporter = LogExporter(repository, ioDispatcher)
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
@@ -87,6 +90,10 @@ class MainViewModel(
             TelemetryService.start(context)
             _uiState.update { it.copy(isTelemetryServiceRunning = true) }
         }
+    }
+
+    suspend fun exportLogs(context: Context, destinationUri: Uri): Result<Int> {
+        return logExporter.exportLogsToUri(context, destinationUri)
     }
 
     fun refreshServiceStatus(context: Context) {

@@ -1,5 +1,10 @@
+@file:Suppress("TooManyFunctions")
+
 package `in`.rahulja.getlogs.ui.components
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,6 +66,7 @@ import `in`.rahulja.getlogs.model.LogEntity
 import `in`.rahulja.getlogs.model.LogType
 import `in`.rahulja.getlogs.ui.MainUiState
 import `in`.rahulja.getlogs.ui.MainViewModel
+import `in`.rahulja.getlogs.util.PermissionHelper
 import kotlinx.coroutines.launch
 
 @Composable
@@ -67,65 +74,183 @@ fun LogListScreen(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val pagingItems = viewModel.logsPagingFlow.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var showClearDialog by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberPermissionLauncher(snackbarHostState) { showPermissionDialog = false }
+    val exportLauncher = rememberExportLauncher(viewModel, snackbarHostState)
+
+    LaunchedEffect(Unit) {
+        if (!PermissionHelper.hasAllRequiredPermissions(context)) {
+            showPermissionDialog = true
+        }
+    }
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { msg -> snackbarHostState.showSnackbar(msg) }
     }
 
-    if (showClearDialog) {
-        ClearLogsConfirmationDialog(
-            onConfirm = {
-                showClearDialog = false
-                viewModel.onClearLogs()
-                coroutineScope.launch { snackbarHostState.showSnackbar("All logs cleared") }
-            },
-            onDismiss = { showClearDialog = false }
-        )
-    }
+    LogListDialogs(
+        showClearDialog = showClearDialog,
+        showPermissionDialog = showPermissionDialog,
+        onConfirmClear = {
+            showClearDialog = false
+            viewModel.onClearLogs()
+            coroutineScope.launch { snackbarHostState.showSnackbar("All logs cleared") }
+        },
+        onDismissClear = { showClearDialog = false },
+        onGrantPermissions = { permissionLauncher.launch(PermissionHelper.getRequiredPermissions()) },
+        onDismissPermissions = { showPermissionDialog = false }
+    )
 
+    val actions = LogListActions(
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        onLogTypeSelected = viewModel::onLogTypeFilterSelected,
+        onToggleService = {
+            if (!uiState.isTelemetryServiceRunning && !PermissionHelper.hasAllRequiredPermissions(context)) {
+                showPermissionDialog = true
+            } else {
+                viewModel.onToggleTelemetryService(context)
+            }
+        },
+        onLogCopied = { coroutineScope.launch { snackbarHostState.showSnackbar("Log copied to clipboard") } },
+        onExportClicked = { exportLauncher.launch("android_logs_${System.currentTimeMillis()}.txt") },
+        onClearClicked = { showClearDialog = true }
+    )
+
+    LogListScaffoldContent(
+        uiState = uiState,
+        pagingItems = pagingItems,
+        snackbarHostState = snackbarHostState,
+        actions = actions,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun rememberPermissionLauncher(
+    snackbarHostState: SnackbarHostState,
+    onResult: () -> Unit
+): ActivityResultLauncher<Array<String>> {
+    val coroutineScope = rememberCoroutineScope()
+    return rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissionsMap ->
+        onResult()
+        val allGranted = permissionsMap.values.all { it }
+        val message = if (allGranted) "Permissions granted" else "Some permissions were denied."
+        coroutineScope.launch { snackbarHostState.showSnackbar(message) }
+    }
+}
+
+@Composable
+private fun rememberExportLauncher(
+    viewModel: MainViewModel,
+    snackbarHostState: SnackbarHostState
+): ActivityResultLauncher<String> {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    return rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        uri?.let { destinationUri ->
+            coroutineScope.launch {
+                val result = viewModel.exportLogs(context, destinationUri)
+                val msg = result.fold(
+                    onSuccess = { "Successfully exported $it logs" },
+                    onFailure = { "Export failed: ${it.localizedMessage ?: "Unknown error"}" }
+                )
+                snackbarHostState.showSnackbar(msg)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LogListScaffoldContent(
+    uiState: MainUiState,
+    pagingItems: LazyPagingItems<LogEntity>,
+    snackbarHostState: SnackbarHostState,
+    actions: LogListActions,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { LogListTopAppBar(onClearClicked = { showClearDialog = true }) },
+        topBar = {
+            LogListTopAppBar(
+                onExportClicked = actions.onExportClicked,
+                onClearClicked = actions.onClearClicked
+            )
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         LogListContentColumn(
-            viewModel = viewModel,
             uiState = uiState,
             pagingItems = pagingItems,
-            onLogCopied = {
-                coroutineScope.launch { snackbarHostState.showSnackbar("Log copied to clipboard") }
-            },
+            actions = actions,
             modifier = Modifier.padding(innerPadding)
         )
     }
 }
 
 @Composable
+@Suppress("LongParameterList")
+private fun LogListDialogs(
+    showClearDialog: Boolean,
+    showPermissionDialog: Boolean,
+    onConfirmClear: () -> Unit,
+    onDismissClear: () -> Unit,
+    onGrantPermissions: () -> Unit,
+    onDismissPermissions: () -> Unit
+) {
+    if (showClearDialog) {
+        ClearLogsConfirmationDialog(
+            onConfirm = onConfirmClear,
+            onDismiss = onDismissClear
+        )
+    }
+
+    if (showPermissionDialog) {
+        PermissionRequestDialog(
+            onGrantPermissions = onGrantPermissions,
+            onDismiss = onDismissPermissions
+        )
+    }
+}
+
+data class LogListActions(
+    val onSearchQueryChanged: (String) -> Unit,
+    val onLogTypeSelected: (LogType?) -> Unit,
+    val onToggleService: () -> Unit,
+    val onLogCopied: (LogEntity) -> Unit,
+    val onExportClicked: () -> Unit,
+    val onClearClicked: () -> Unit
+)
+
+@Composable
 fun LogListContentColumn(
-    viewModel: MainViewModel,
     uiState: MainUiState,
     pagingItems: LazyPagingItems<LogEntity>,
-    onLogCopied: (LogEntity) -> Unit,
+    actions: LogListActions,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     Column(modifier = modifier.fillMaxSize()) {
         SearchAndFilterSection(
             searchQuery = uiState.searchQuery,
-            onSearchQueryChanged = viewModel::onSearchQueryChanged,
+            onSearchQueryChanged = actions.onSearchQueryChanged,
             selectedLogType = uiState.selectedLogType,
-            onLogTypeSelected = viewModel::onLogTypeFilterSelected,
+            onLogTypeSelected = actions.onLogTypeSelected,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
         ServiceControlCard(
             isRunning = uiState.isTelemetryServiceRunning,
-            onToggleService = { viewModel.onToggleTelemetryService(context) },
+            onToggleService = actions.onToggleService,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
 
@@ -134,7 +259,7 @@ fun LogListContentColumn(
         LogsListContent(
             pagingItems = pagingItems,
             uiState = uiState,
-            onLogCopied = onLogCopied
+            onLogCopied = actions.onLogCopied
         )
     }
 }
@@ -142,6 +267,7 @@ fun LogListContentColumn(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogListTopAppBar(
+    onExportClicked: () -> Unit,
     onClearClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -154,6 +280,12 @@ fun LogListTopAppBar(
             )
         },
         actions = {
+            IconButton(onClick = onExportClicked) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Export logs"
+                )
+            }
             IconButton(onClick = onClearClicked) {
                 Icon(
                     imageVector = Icons.Default.Delete,

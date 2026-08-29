@@ -2,12 +2,15 @@ package `in`.rahulja.getlogs.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import `in`.rahulja.getlogs.model.LogEntity
 import `in`.rahulja.getlogs.model.LogType
 import `in`.rahulja.getlogs.ui.components.EmptyLogState
 import `in`.rahulja.getlogs.ui.components.LogItemCard
+import `in`.rahulja.getlogs.ui.components.LogListTopAppBar
+import `in`.rahulja.getlogs.ui.components.PermissionRequestDialog
 import `in`.rahulja.getlogs.ui.components.ServiceControlCard
 import `in`.rahulja.getlogs.ui.theme.AndroidLogsTheme
 import org.junit.Assert.assertEquals
@@ -52,13 +55,11 @@ class LogListScreenTest {
 
     @Test
     fun testServiceControlCardActiveState() {
-        var toggleClicked = false
-
         composeTestRule.setContent {
             AndroidLogsTheme {
                 ServiceControlCard(
                     isRunning = true,
-                    onToggleService = { toggleClicked = true }
+                    onToggleService = {}
                 )
             }
         }
@@ -82,6 +83,8 @@ class LogListScreenTest {
 
         composeTestRule.onNodeWithText("Service Inactive").assertIsDisplayed()
         composeTestRule.onNodeWithText("Background monitoring is stopped").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Inactive").performClick()
+        assertTrue(toggleClicked)
     }
 
     @Test
@@ -96,5 +99,49 @@ class LogListScreenTest {
         }
 
         composeTestRule.onNodeWithText("No Logs Recorded Yet").assertIsDisplayed()
+    }
+
+    @Test
+    fun testLogListTopAppBarExportAndClearButtons() {
+        var exportClicked = false
+        var clearClicked = false
+
+        composeTestRule.setContent {
+            AndroidLogsTheme {
+                LogListTopAppBar(
+                    onExportClicked = { exportClicked = true },
+                    onClearClicked = { clearClicked = true }
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Android Logs").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Export logs").performClick()
+        assertTrue(exportClicked)
+
+        composeTestRule.onNodeWithContentDescription("Clear all logs").performClick()
+        assertTrue(clearClicked)
+    }
+
+    @Test
+    fun testPermissionRequestDialogInteractions() {
+        var grantClicked = false
+        var dismissClicked = false
+
+        composeTestRule.setContent {
+            AndroidLogsTheme {
+                PermissionRequestDialog(
+                    onGrantPermissions = { grantClicked = true },
+                    onDismiss = { dismissClicked = true }
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Permissions Required").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Grant Permissions").performClick()
+        assertTrue(grantClicked)
+
+        composeTestRule.onNodeWithText("Later").performClick()
+        assertTrue(dismissClicked)
     }
 }

@@ -211,6 +211,20 @@ class MainViewModelTest {
     }
 
     @Test
+    fun exportLogsDelegatesToLogExporter() = runTest(testDispatcher) {
+        val mockExporter = mockk<`in`.rahulja.getlogs.util.LogExporter>()
+        val mockUri = mockk<android.net.Uri>()
+        coEvery { mockExporter.exportLogsToUri(context, mockUri) } returns Result.success(5)
+
+        val viewModel = MainViewModel(repository, testDispatcher, mockExporter)
+        val result = viewModel.exportLogs(context, mockUri)
+
+        assertTrue(result.isSuccess)
+        assertEquals(5, result.getOrNull())
+        coVerify(exactly = 1) { mockExporter.exportLogsToUri(context, mockUri) }
+    }
+
+    @Test
     fun factoryCreatesMainViewModelInstance() {
         val factory = MainViewModel.Factory(repository)
         val viewModel = factory.create(MainViewModel::class.java)
