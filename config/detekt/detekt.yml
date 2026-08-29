@@ -24,6 +24,9 @@ naming:
   active: true
   PackageNaming:
     active: false
+  FunctionNaming:
+    active: true
+    ignoreAnnotated: ['Composable']
 
 formatting:
   active: true
