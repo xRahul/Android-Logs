@@ -10,14 +10,28 @@ android {
     namespace = "in.rahulja.getlogs"
     compileSdk = 35
 
+    val appVersionCode = (project.findProperty("versionCode") as? String)?.toIntOrNull()
+        ?: (System.getenv("APP_VERSION_CODE")?.toIntOrNull() ?: 1)
+    val appVersionName = (project.findProperty("versionName") as? String)
+        ?: (System.getenv("APP_VERSION_NAME") ?: "1.0.0")
+
     defaultConfig {
         applicationId = "in.rahulja.getlogs"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
     }
 
     signingConfigs {
